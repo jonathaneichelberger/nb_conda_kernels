@@ -16,6 +16,18 @@ CACHE_TIMEOUT = 60
 
 CONDA_EXE = os.environ.get("CONDA_EXE", "conda")
 
+try:
+    ROOT_ENV_NAME = subprocess.check_output(
+        [
+            join(dirname(CONDA_EXE), 'python'),
+            '-c',
+            'from conda.base.constants import ROOT_ENV_NAME; print(ROOT_ENV_NAME, end="")',
+        ],
+        stderr=subprocess.DEVNULL
+    ).decode('ascii')
+except (FileNotFoundError, subprocess.CalledProcessError):
+    ROOT_ENV_NAME = 'root'
+
 RUNNER_COMMAND = ['python', '-m', 'nb_conda_kernels.runner']
 
 
@@ -119,7 +131,7 @@ class CondaKernelSpecManager(KernelSpecManager):
                 if self._env_filter_regex.search(env_path):
                     continue
             if env_path == base_prefix:
-                env_name = 'root'
+                env_name = ROOT_ENV_NAME
             elif env_path.startswith(build_prefix):
                 # Skip the conda-bld directory entirely
                 continue
@@ -179,7 +191,7 @@ class CondaKernelSpecManager(KernelSpecManager):
                     kernel_name = 'py'
                 elif kernel_name == 'ir':
                     kernel_name = 'r'
-                kernel_prefix = '' if env_name == 'root' else 'env-'
+                kernel_prefix = '' if env_name == ROOT_ENV_NAME else 'env-'
                 kernel_name = u'conda-{}{}-{}'.format(kernel_prefix, env_name, kernel_name)
                 # Replace invalid characters with dashes
                 kernel_name = self.clean_kernel_name(kernel_name)
