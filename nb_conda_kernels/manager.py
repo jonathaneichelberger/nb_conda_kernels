@@ -35,16 +35,16 @@ class CondaKernelSpecManager(KernelSpecManager):
     """ A custom KernelSpecManager able to search for conda environments and
         create kernelspecs for them.
     """
-    conda_only = Bool(False,
+    conda_only = Bool(False, config=True,
                       help="Include only the kernels not visible from Jupyter normally")
 
-    context_prefix = Bool(False,
+    context_prefix = Bool(False, config=True,
                           help="Add a prefix to environments not found in the default environment location")
 
     env_filter = Unicode(None, config=True, allow_none=True,
                          help="Do not list environment names that match this regex")
 
-    hide_python_version = Bool(True,
+    hide_python_version = Bool(True, config=True,
                                help="Hide the version of python in the display names of discovered python kernels")
 
     name_format = Unicode('{0} [conda env:{1}]', config=True,
