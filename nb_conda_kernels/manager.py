@@ -38,8 +38,14 @@ class CondaKernelSpecManager(KernelSpecManager):
     conda_only = Bool(False,
                       help="Include only the kernels not visible from Jupyter normally")
 
+    context_prefix = Bool(False,
+                          help="Add a prefix to environments not found in the default environment location")
+
     env_filter = Unicode(None, config=True, allow_none=True,
                          help="Do not list environment names that match this regex")
+
+    hide_python_version = Bool(True,
+                               help="Hide the version of python in the display names of discovered python kernels")
 
     name_format = Unicode('{0} [conda env:{1}]', config=True,
                           help="String name format; '{{0}}' = Language, '{{1}}' = Kernel")
@@ -142,7 +148,7 @@ class CondaKernelSpecManager(KernelSpecManager):
                 # directory named 'envs' is a collection of environments
                 # as created by, say, conda or anaconda-project. The name
                 # of the parent directory, then, provides useful context.
-                if basename(env_base) == 'envs' and (env_base != envs_prefix or env_name in all_envs):
+                if self.context_prefix and basename(env_base) == 'envs' and (env_base != envs_prefix or env_name in all_envs):
                     env_name = u'{}-{}'.format(basename(dirname(env_base)), env_name)
             # Further disambiguate, if necessary, with a counter.
             if env_name in all_envs:
@@ -196,7 +202,7 @@ class CondaKernelSpecManager(KernelSpecManager):
                 # Replace invalid characters with dashes
                 kernel_name = self.clean_kernel_name(kernel_name)
                 display_prefix = spec['display_name']
-                if display_prefix.startswith('Python'):
+                if display_prefix.startswith('Python') and self.hide_python_version:
                     display_prefix = 'Python'
                 display_name = self.name_format.format(display_prefix, env_name)
                 if env_path == sys.prefix:
